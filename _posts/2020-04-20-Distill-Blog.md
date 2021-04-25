@@ -1,4 +1,10 @@
-﻿**The unreasonable effectiveness of distillation - Text Classification  Part 1/3** 
+---
+layout: post
+title: "The unreasonable effectiveness of distillation - Text Classification  Part 1/3"
+date: 2020-04-20
+---
+
+**The unreasonable effectiveness of distillation - Text Classification  Part 1/3** 
 
 In recent years, increasingly large Transformer-based models such as BERT, have demonstrated remarkable state-of-the-art (SoTA) performance in many Natural Language Processing (NLP) tasks and have become the de-facto standard. 
 
