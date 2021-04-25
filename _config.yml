@@ -1,10 +1,10 @@
 # Site settings
 title: Moshe Wasserblat blog
 email: 
-description: "Musings of a Computer Scientist."
+description: "Efficient and Robust NLP"
 baseurl: ""
 url: "http://MosheWasserb.github.io"
-twitter_username: moshe
+twitter_username: MosheWasserblat
 github_username:  MosheWasserb
 
 # Build settings
