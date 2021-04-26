@@ -76,12 +76,14 @@ popular SoTA transformer models.
 
 **3rd: Transformers models**
 
+
 |           |              |                  |                                                                                              |
 |-----------|--------------|------------------|----------------------------------------------------------------------------------------------|
 | **Model** | **Accuracy** | **\#Parameters** | **Implementation Source**                                                                    |
 | BERT      | 92.4         | 110M             | Our                                                                                          |
 | Roberta   | 93           | 110M             | Our                                                                                          |
 | T5        | 93.5         | 11B              | [<u>t5-base-finetuned-emotion</u>](https://huggingface.co/mrm8488/t5-base-finetuned-emotion) |
+
 
 Awsome, accuracy flies to the sky but … 110M parameters are far above
 our computational budget, and for sure IT hits the ceiling when they
@@ -93,11 +95,13 @@ base.
 
 **4th step: DistillBERT**
 
+
 |                |              |                  |                                                                                                                         |
 |----------------|--------------|------------------|-------------------------------------------------------------------------------------------------------------------------|
 | **Model**      | **Accuracy** | **\#Parameters** | **Implementation Source**                                                                                               |
 | DistillBERT    | 91.5         | 67M              | Our                                                                                                                     |
 | DistillRoberta | 92.3         | 67M              | [<u>Elvis Saravia</u>](https://colab.research.google.com/drive/1nwCE6b9PXIKhv2hvbqf1oZKIGkXMTi1X#scrollTo=ZhHutCseBxjJ) |
+
 
 Nice, we gained &lt;1% loss vs. BERT model and a much smaller one.
 
@@ -150,11 +154,13 @@ In our case let’s distill Roberta’s knowledge into our simple MLP NN.
 
 Following are the results:
 
+
 |           |              |                  |
 |-----------|--------------|------------------|
 | **Model** | **Accuracy** | **\#Parameters** |
 | MLP       | 86           | 80K              |
 | MLP\_D    | 91.8         | 80K              |
+
 
 Wow!!! Surprisingly not bad at all, on-par accuracy with DistilBERT.
 
