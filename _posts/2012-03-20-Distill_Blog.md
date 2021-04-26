@@ -130,7 +130,7 @@ Figure 1, a smaller and simpler student model that is more practical for
 deployment in environments with limited resources, is trained to mimic
 the behavior of the teacher model.
 
-> <img src="media/image1.png" style="width:5.18229in;height:1.72743in" />
+> <img src="/assets/image1.png" style="width:5.18229in;height:1.72743in" />
 >
 > Figure 1: Student model training process.
 
@@ -250,7 +250,7 @@ sufficient for production purposes.
 The following figure summarizes the results that we achieved so far for
 SST-2 in terms of (model acc./BERT acc.)% Vs. model size.
 
-<img src="media/image3.png" style="width:3.40706in;height:2.34073in" />
+<img src="/assets/image3.png" style="width:3.40706in;height:2.34073in" />
 
 **The CoLA Dataset** and Task
 
@@ -299,7 +299,7 @@ as sufficient for production purposes.
 The following figure summarizes the results that we have so far with
 CoLA.
 
-<img src="media/image4.png" style="width:3.88569in;height:2.67188in" />
+<img src="/assets/image4.png" style="width:3.88569in;height:2.67188in" />
 
 **Note**: At this point it may be trivial to think that Bi-LSTM/MLP
 didnt hold the full capacity of BERT since they have simpler
@@ -414,7 +414,7 @@ scores plotted for various GLUE tasks followed by a table that presents
 our measure of BERT WOS score for Emotion, SST-2 and CoLA datasets
 (1-gram shuffling):
 
-<img src="media/image5.png" style="width:4.00714in;height:2.92188in" />
+<img src="/assets/image5.png" style="width:4.00714in;height:2.92188in" />
 
 |             |         |
 |-------------|---------|
@@ -491,7 +491,7 @@ Below a diagram that presents an abstract view of the switch
 architecture and followed by simple/hard instance examples from SST-2
 dataset:
 
-<img src="media/image6.png" style="width:3.50521in;height:3.14008in" />
+<img src="/assets/image6.png" style="width:3.50521in;height:3.14008in" />
 
 |             |                                                                           |                                                                                                                  |
 |-------------|---------------------------------------------------------------------------|------------------------------------------------------------------------------------------------------------------|
