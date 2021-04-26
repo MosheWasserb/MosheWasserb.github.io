@@ -1,0 +1,1759 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=utf-8">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:115%;
+	font-size:11.0pt;
+	font-family:"Arial",sans-serif;}
+h1
+	{margin-top:20.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:20.0pt;
+	font-family:"Arial",sans-serif;
+	font-weight:normal;}
+h2
+	{margin-top:18.0pt;
+	margin-right:0cm;
+	margin-bottom:6.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:16.0pt;
+	font-family:"Arial",sans-serif;
+	font-weight:normal;}
+h3
+	{margin-top:16.0pt;
+	margin-right:0cm;
+	margin-bottom:4.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:14.0pt;
+	font-family:"Arial",sans-serif;
+	color:#434343;
+	font-weight:normal;}
+h4
+	{margin-top:14.0pt;
+	margin-right:0cm;
+	margin-bottom:4.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:12.0pt;
+	font-family:"Arial",sans-serif;
+	color:#666666;
+	font-weight:normal;}
+h5
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:4.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:11.0pt;
+	font-family:"Arial",sans-serif;
+	color:#666666;
+	font-weight:normal;}
+h6
+	{margin-top:12.0pt;
+	margin-right:0cm;
+	margin-bottom:4.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:11.0pt;
+	font-family:"Arial",sans-serif;
+	color:#666666;
+	font-weight:normal;
+	font-style:italic;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:3.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:26.0pt;
+	font-family:"Arial",sans-serif;}
+p.MsoSubtitle, li.MsoSubtitle, div.MsoSubtitle
+	{margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:16.0pt;
+	margin-left:0cm;
+	line-height:115%;
+	page-break-after:avoid;
+	font-size:15.0pt;
+	font-family:"Arial",sans-serif;
+	color:#666666;}
+.MsoChpDefault
+	{font-size:11.0pt;
+	font-family:"Arial",sans-serif;}
+.MsoPapDefault
+	{line-height:115%;}
+@page WordSection1
+	{size:612.0pt 792.0pt;
+	margin:72.0pt 72.0pt 72.0pt 72.0pt;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNormal><b><span lang=EN style='font-size:13.0pt;line-height:115%'>The
+unreasonable effectiveness of distillation - Text Classification  Part 1/3 </span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>In recent years,
+increasingly large Transformer-based models such as BERT, have demonstrated
+remarkable state-of-the-art (SoTA) performance in many Natural Language
+Processing (NLP) tasks and have become the de-facto standard. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>However there is no
+free lunch (indeed? Wait you read this blog series), those models are extremely
+inefficient and require massive computational resources and large amounts of
+data as basic requirements for training and deploying. This severely hinders
+the scalability and deployment of NLP<u><span style='color:teal'>-</span></u>based
+systems across the industry.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>I have always been
+fascinated by robustness and efficiency in NLP targeting production. So I
+decided to write a series of blogs that will provide some practical tips with
+code samples regarding how to deploy and adapt SoTA large transformer models. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>In the first 3
+blogs I will focus on model distillation for Text-Classification. Model
+distillation is a very powerful pruning technique and in many use-cases yields
+significant speed-up and memory size reduction. But still considered more for
+advanced users: relatively hard to implement, un-predictable performance,
+minimization of multi-loss errors,  and lack of understanding of the inherent
+mechanism. I will try to show the opposite by providing a few real use-case examples
+with simple code snippets and distiiation’s efficacy intuition. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Ok so let’s start. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Suppose that you
+are a data scientist in one of the top leading enterprise companies and your
+task is to classify social media tweets and deliver SoTA models into
+production. You have also been told that your model must be very efficient
+since you will pay a high fee for any extra milion parameters. So most likely
+you will start by collecting sufficient data (a few hundred/thousands of
+labeled samples) and compare a few ML/DL models and Transformer models to
+target high accuracy with minimum cost (model size). </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>In order to
+demonstrate the accuracy achieved by different model types I choose an emotion
+classification dataset (<a href="https://huggingface.co/datasets/emotion"><span
+style='color:#1155CC'>Emotions)</span></a> that consists of Twitter posts
+labeled with any of six basic emotion categories: sadness, disgust, anger, joy,
+surprise, and fear. The data consists of 16K training samples and 2K test
+samples and available on HuggingFace data-set Hub. A code example for the
+following steps are available here.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>1st  step: Set a
+baseline using a logistic regression model (TfIdf based)</span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Accuracy = 86.1%</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Our baseline
+result. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>2nd step: Deep
+Learning baseline</span></b><span lang=EN> </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Next, we will try a
+simple MLP Neural Network (NN). The model architecture is very basic and
+includes an input embedding size of 16, a word vocabulary size of 5000, and one
+hidden layer.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Accuracy = 86%</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Number of
+parameters = 80K </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Similar accuracy to
+Logistic regression but more efficient and dense. We are veterans in the NLP
+domain and by now already practiced with HuggingFace and their amazing
+“transformers” library so let’s try a few popular SoTA transformer models. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>3rd:
+Transformers models</span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a border=1 cellspacing=0 cellpadding=0 width=651 style='border-collapse:
+ collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Implementation
+  Source</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>BERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>92.4</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Our</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Roberta</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>93</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>110M</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Our</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>T5</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>93.5</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>11B </span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN><a
+  href="https://huggingface.co/mrm8488/t5-base-finetuned-emotion"><span
+  style='color:#1155CC'>t5-base-finetuned-emotion</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Awsome, accuracy flies
+to the sky but … 110M parameters are far above our computational budget, and
+for sure IT hits the ceiling when they hear about the 11B model (:</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>So instead let’s
+try one of the more popular models like DistillBERT that HugginngFace released,
+half the size and double the speed vs. BERT base.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>4th step:
+DistillBERT</span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a0 border=1 cellspacing=0 cellpadding=0 width=650
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Implementation
+  Source</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>DistillBERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91.5</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>67M</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Our</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>DistillRoberta </span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>92.3</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>67M</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN><a
+  href="https://colab.research.google.com/drive/1nwCE6b9PXIKhv2hvbqf1oZKIGkXMTi1X#scrollTo=ZhHutCseBxjJ"><span
+  style='color:#1155CC'>Elvis Saravia</span></a></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Nice, we gained
+&lt;1% loss vs. BERT model and a much smaller one. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>So that’s it? Are
+we done? Are we ready to go with this model to production and pay the computing
+cost for the 67M parameters?</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Can we do more? Can
+we do with less than 1M or 100K with minimal accuracy loss (&lt;1% loss)? </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>The answer is
+“yes”  (a spoiler: but in general the answer varys and depends on your dataset
+quality and task in-hand) with the help of distillation and additional data
+either augmented from the training set or sampled from your in-domain unlabeled
+data-set. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Recall BERT is a
+pre-trained language model trained for the Mask Language Model task and here we
+are interested only in emotion classification. Previous research shows that
+fine-tuned BERTs parameters are over-parameterized  for domain specific tasks (<a
+href="https://arxiv.org/abs/1908.08593"><span style='color:#1155CC'>Kovaleva at
+al., 2019</span></a>). </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN> </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Knowledge
+distillation (KD) to very simpler architectures (<a
+href="https://arxiv.org/pdf/1903.12136.pdf"><span style='color:#1155CC'>Tang et
+al., 2019</span></a>; <a
+href="https://www.aclweb.org/anthology/2020.sustainlp-1.5.pdf"><span
+style='color:#1155CC'>Wasserblat et al., 2020</span></a>) has shown promising
+results for reducing the model size and computational load while preserving
+much of the original model’s performance. A typical model distillation setup
+includes two stages. In the first stage, a large, cumbersome and accurate
+teacher neural network is trained for a specific downstream task.  In the
+second stage, shown in Figure 1, a smaller and simpler student model that is
+more practical for deployment in environments with limited resources, is
+trained to mimic the behavior of the teacher model.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt'><span lang=EN><img border=0
+width=373 height=124 id=image4.png
+src="2020-04-20-Distill-Blog_v1.fld/image001.jpg"></span></p>
+
+<p class=MsoNormal style='margin-left:72.0pt;text-indent:36.0pt;line-height:
+normal'><span lang=EN style='font-size:11.5pt'>Figure 1:  Student model
+training process. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><u><span lang=EN>Code disclaimer</span></u><span
+lang=EN>: In order to make KD super easy, we only use the distillation loss
+which is calculated for each training batch by calculating Kullback–Leibler
+(KL) distance between the target predictions that are produced by the student
+and teacher models. We didn't notice any performance loss vs. deploying MSE
+between soft targets (logits), nor adding temperature as in the distillation
+original paper (<a href="https://arxiv.org/abs/1503.02531"><span
+style='color:#1155CC'>Hinton et al., 2015</span></a>). The KL loss allows us to
+use the same code for standard training (labeled data) or distillation (pseudo
+labeled data). </span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>&nbsp;</span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>5th step:
+Distill Roberta to a simpler student</span></b></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>In our case let’s
+distill Roberta’s knowledge into our simple MLP NN. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Following are the
+results:</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a1 border=1 cellspacing=0 cellpadding=0 width=624
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>MLP</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>86</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>MLP_D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>91.8</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Wow!!! Surprisingly
+not bad at all, on-par accuracy with DistilBERT.  </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>The following
+figure summarizes the results that we achieved so far for Emotion in terms of
+(model acc./BERT acc.)% Vs. model size.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN><img border=0 width=269 height=185
+id=image1.png src="2020-04-20-Distill-Blog_v1.fld/image002.jpg"></span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify'><span lang=EN
+style='font-size:9.0pt;line-height:115%'>Figure: Unreasonable example for the
+effectiveness of distillation: Accuracy of a distilled MLP student (80K
+parameters) is on-par with BERT (the teacher with 110M params), BERT Large
+(330M params) and T5 (11B params) on Emotions dataset.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>Ok, We were able to
+distill Roberta’s knowledge into our tiny model with almost no loss. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>We benefit from
+high transformer model performance with very little cost to pay (and for our
+IT).</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>In this stage you
+probably have many questions, here are few examples:</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify;text-indent:
+-18.0pt'><span lang=EN>●<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span lang=EN>Does this “trick” hold for any
+classification sub-task (or any other NLP’s tasks) specifically on our own
+data-set? </span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify;text-indent:
+-18.0pt'><span lang=EN>●<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span lang=EN>If not, when does it work? </span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify;text-indent:
+-18.0pt'><span lang=EN>●<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span lang=EN>How to choose the best student
+for my data-set?  </span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify;text-indent:
+-18.0pt'><span lang=EN>●<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span lang=EN>What is the intuition behind
+this mechanism?</span></p>
+
+<p class=MsoNormal style='margin-left:36.0pt;text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>I’ll try to answer
+those questions and give a bit of intuition in the following blogs.   </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<span lang=EN style='font-size:11.0pt;line-height:115%;font-family:"Arial",sans-serif'><br
+clear=all style='page-break-before:always'>
+</span>
+
+<p class=MsoNormal><b><span lang=EN style='font-size:14.0pt;line-height:115%'>&nbsp;</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN style='font-size:14.0pt;line-height:115%'>The
+unreasonable effectiveness of distillation -  Text-Classification Part 2/3</span></b></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>In the first blog, we achieved a surprisingly
+good performance by distilling large (teacher) models into tiny (student)
+models that are on-par with the transformer mammoth models. In this blog, we
+intend to further explore it and verify whether these results can also be
+achieved for other text-classification’s data-sets and sub-tasks.</span></p>
+
+<p class=MsoNormal><span lang=EN>For that matter we choose SST-2 and CoLA which
+are popular single-sentence classification datasets and are part of the widely
+used General Language Understanding Evaluation (<a
+href="https://arxiv.org/abs/1804.07461"><span style='color:#1155CC'>GLUE</span></a>)
+benchmark.</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><b><span lang=EN>SST-2 Dataset </span></b></p>
+
+<p class=MsoNormal><span lang=EN>SST-2 The Stanford Sentiment Treebank 2
+comprises single sentences extracted from movie reviews and  binary
+(positive/negative) sentiment classification labels.</span></p>
+
+<p class=MsoNormal><span lang=EN>For SST-2, we use the dataset version provided
+<a
+href="https://github.com/clairett/pytorch-sentiment-classification/blob/master/data/SST2/train.tsv"><span
+style='color:#1155CC'>here</span></a>, the data consists of 6920 training
+samples and 1800 test samples.. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Following are the results of few transformer
+models, MLP and the distillation of the RoBERTa model into the MLP.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a2 border=1 cellspacing=0 cellpadding=0 width=623
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>RoBERTa (teacher)</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>93</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>BERT-base</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91.4</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN><a
+  href="https://arxiv.org/pdf/1910.01108.pdf"><span style='color:#1155CC'>DistillBERT</span></a></span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>90.4</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>66M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>MLP</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>79</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>MLP-D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>86</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Oops, we notice a drop of 6% with MLP-D
+compared to BERT-base.</span></p>
+
+<p class=MsoNormal><span lang=EN>So, this time the tiny model fails to learn
+the full capacity of knowledge that allows it to decode the classification task
+as well as the teacher model.</span></p>
+
+<p class=MsoNormal><span lang=EN>Instead, let's try to replace our student
+model with a much deeper architecture but still significantly smaller vs. BERT:
+A  Bi-LSTM with 1.7M parameters (x80).</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Following are the results of the Bi-LSTM
+student distilled model.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a3 border=1 cellspacing=0 cellpadding=0 width=624
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Bi-LSTM-D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>90</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>1.7M</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Not bad, we only have a 2% accuracy drop and
+we are on-par with DistillBERT.</span></p>
+
+<p class=MsoNormal><span lang=EN>So, for SST-2, a simple Bi-LSTM student whould
+be considered as sufficient for production purposes.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>The following
+figure summarizes the results that we achieved so far for SST-2 in terms of
+(model acc./BERT acc.)% Vs. model size.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN><img border=0
+width=245 height=168 id=image3.png
+src="2020-04-20-Distill-Blog_v1.fld/image003.jpg"></span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><b><span lang=EN>The CoLA Dataset</span></b><span lang=EN>
+and Task</span></p>
+
+<p class=MsoNormal><span lang=EN><a href="https://nyu-mll.github.io/CoLA/"><span
+style='color:#1155CC'>CoLA</span></a> The Corpus of Linguistic Acceptability
+consists of English acceptability judgments drawn from books and journal
+articles on linguistic theory. Each sentence is associated with a label that indicates
+whether it is a grammatical English sentence or not. </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Following are the results for the teacher
+model (BERT) and the two student distilled models :</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a4 border=1 cellspacing=0 cellpadding=0 width=624
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>MCC </span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>BERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>52.8</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>MLP+D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>10</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Bi-LSTM+D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>24</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>1.7M</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Whoops, in contrast to the SST-2 dataset even
+the Bi-LSTM doesn’t hold the capacity to match BERT on the CoLA task.  Both the
+Bi-LSTM and the MLP+Attn.models are far from being comparable to BERT. In the
+case of SST-2 task, Bi-LSTM which is a larger and deeper model than MLP closed
+the gap with the teacher model (BERT). </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Let’s try a model with a larger and deeper
+model than Bi-LSTM for the CoLA task, but one that is still more efficient
+compared to the teacher model.</span></p>
+
+<p class=MsoNormal><span lang=EN>We chose DistilBERT, a very popular model by
+HuggingFace based on self-distill of logits, and embeddings. </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Following are the results:</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a5 border=1 cellspacing=0 cellpadding=0 width=624
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>MCC</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>DistilBERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>51.3</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>66M</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Great, now we only have 1.5% accuracy drop and
+we are on-par with BERT base.</span></p>
+
+<p class=MsoNormal><span lang=EN>So, for the CoLA task, a self-distilled Bert
+student will be considered as sufficient  for production purposes.</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>The following
+figure summarizes the results that we have so far with CoLA. </span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN><img border=0
+width=280 height=192 id=image2.png
+src="2020-04-20-Distill-Blog_v1.fld/image004.jpg"></span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><b><span lang=EN>Note</span></b><span lang=EN>: At this
+point it may be trivial to think that Bi-LSTM/MLP didnt hold the full capacity
+of BERT since they have simpler architecture but remember that KD dependent on
+the availability of un-labeled in-domain data. In the case of CoLA we didnt
+have sufficient in-domain data so we had to generate data using data different
+augmentation techniques.  ColA’s grammatical acceptence task is very
+challenging so not sure we were able to generate high quality data that
+represent the full task’s data distribution. This is very important research
+direction, we have noticed significant improvement (2-3 points) when distill
+with generative model (e.g. GPT-2) vs. Easy Data  Augmentatoion (EDA) which
+based on semantic replacement of random key-words. </span></p>
+
+<p class=MsoNormal><b><span lang=EN>&nbsp;</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN>Some Intuition  </span></b></p>
+
+<p class=MsoNormal><span lang=EN>In general we showed that it is feasible to
+distil BERT using very efficient models while preserving comparable results.
+However, the success of the distillation (student size vs. accuracy) depends on
+the dataset and task at hand. </span></p>
+
+<p class=MsoNormal><span lang=EN>What is the reason for such variance in
+performance?</span></p>
+
+<p class=MsoNormal><span lang=EN>In order to answer this question we need first
+to look into the different datasets.</span></p>
+
+<p class=MsoNormal><span lang=EN>Here are few data instances taken from the 3
+dataset:</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<table class=a6 border=1 cellspacing=0 cellpadding=0 width=690
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Dataset</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Instance
+  examples</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Category</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Task</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Emotion</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>im
+  updating my blog because i feel shitty</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Sadness</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Emotion</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>i
+  just feel greedy and lame making one</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Anger</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>im
+  feeling more comfortable with derby</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Joy</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>SST-2</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>works
+  because , for the most part , it avoids the stupid cliches and formulaic
+  potholes that befall its brethren</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>POS</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Sentiment</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>but
+  the characters tend to be cliches whose lives are never fully explored</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>NEG</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN><a
+  href="https://arxiv.org/pdf/1805.12471.pdf"><span style='color:#1155CC'>CoLA</span></a></span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>many
+  evidence was provided </span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>unacceptable</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Grammatical
+  acceptability </span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>The jeweller
+  inscribed the ring with the name </span></p>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>acceptable</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr style='height:22.35pt'>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt;
+  height:22.35pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt;height:22.35pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>The gardener
+  planted roses in the garden </span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt;height:22.35pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>acceptable</span></p>
+  </td>
+  <td valign=top style='border:none;border-right:solid black 1.0pt;padding:
+  5.0pt 5.0pt 5.0pt 5.0pt;height:22.35pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>The more books I
+  ask to whom he will give, the more he reads</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>unacceptable</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>&nbsp;</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>A successful classification of the Emotion
+task seems to be heavily dependent on lexical cues - salient emotional words
+that represent the emotional category regardless of structure and syntax. On
+the other hand the CoLA task is inherently dependent on the syntax structure
+and less on lexical cues. Whereas, successful classification of theSST-2 task
+seems to be dependent on a mix of lexical and syntactic clues.</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>So in order to successfully distill the full
+teacher knowledge which is required for a given task, the student architecture
+must be capable to absorb its teacher capacity that is related to the task. In
+the case of CoLA and partially SST-2, the architecture of the MLP model does
+not have the capacity to learn the full syntactic information stored in the
+teacher.  This is clear since the MLP’s architecture is basically based on Bag
+Of Word (BOW) embedding implementation. Classification of the Emotion’s task
+requires the learning of mostly semantic lexical knowledge therefore MLP is
+sufficient and Bi-LSTM and DistillBERT are over-qualified,</span></p>
+
+<p class=MsoNormal><span lang=EN>. </span></p>
+
+<p class=MsoNormal><span lang=EN>To summarize: Classification tasks that
+require capturing of general lexical semantics cues can be successfully
+distilled by very simple and efficient models; however, classification tasks
+that require the detection of linguistic structure and contextual relations are
+more challenging for distillation using simple student models</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>In the next blog, we will suggest a simple
+metric to estimate the success of the distillation.</span></p>
+
+<p class=MsoNormal><span lang=EN>We also showcase a simple dynamic architecture
+that utilizes this metric to achieve optimal tradeoff between size and accuracy
+for a given data set/task. Then we propose a few future research directions.   
+</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><b><span lang=EN style='font-size:14.0pt;line-height:115%'>The
+unreasonable effectiveness of distillation - Word Order Sensetivity and Dynamic
+Data Aware Transformer  Part 3/3</span></b></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>In the last two blogs we saw useful examples
+of text classification distillation methods.</span></p>
+
+<p class=MsoNormal><span lang=EN>We presented some intuition why distillation
+works and how to choose the smallest student model that can match the capacity
+of its teacher model.</span></p>
+
+<p class=MsoNormal><span lang=EN>In this blog, I would like to suggest a metric
+for estimating the complexity level of your dataset/task and exploit it to
+optimize the distillation performance. We’ll then propose a naive switch
+transformer architecture in order to maximize the simplicity of our
+dataset/task to the efficiency in terms of student model size. We will end the
+series of blogs with a few thoughts on the transformer structure and future
+research directions. </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><b><span lang=EN>Word order sensitivity</span></b></p>
+
+<p class=MsoNormal><span lang=EN>As we noted “simple” instances/examples means
+that prediction is mostly based on lexical semantic cues and seems to be rather
+agnostic to syntax or word order. <a href="https://arxiv.org/pdf/2012.15180.pdf"><span
+style='color:#1155CC'>Thang et al., 2020</span></a> showed a surprising
+phenomenon: between 75% and 90% of the correct predictions of Transformer-based
+classifiers, trained on GLUE tasks, remained unchanged when the input words
+were randomly shuffled. The authors further suggested a simple metric to
+measure dataset sensitivity to word order:</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>WOS (Word Order Sensitivity) = (100-p)/50 </span></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><span lang=EN>where p is the
+accuracy of a task-trained model evaluated on a dev-s set </span></p>
+
+<p class=MsoNormal style='text-indent:36.0pt'><span lang=EN>(See Thang’s Sec
+3.1 and 2.3.2)</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Below is a figure taken from <a
+href="https://arxiv.org/pdf/2012.15180.pdf"><span style='color:#1155CC'>Thang
+et al.</span></a>, that shows the WOS  scores plotted for various GLUE tasks
+followed by a table that presents our measure of BERT WOS score for Emotion,
+SST-2 and CoLA datasets (1-gram shuffling):</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN><img border=0 width=289 height=210
+id=image6.png src="2020-04-20-Distill-Blog_v1.fld/image005.jpg"></span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<table class=a7 border=1 cellspacing=0 cellpadding=0 width=214
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>Dataset</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><b><span lang=EN>WOS</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>Emotion</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>0.14</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>SST-2</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>0.34</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>CoLA</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal;border:none'><span lang=EN>0.99</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Our intuition, discussed in the previous blog,
+was right! The CoLA dataset with average WOS score of 0.99 which means that it
+consists of a vast majority of “hard” samples where the Emotion dataset has the
+lowest WOS score which means that it consists of a vast majority of “simple”
+samples. </span></p>
+
+<p class=MsoNormal><span lang=EN>The SST-2 WOS score is 0.34 which means that
+it  tends to have more “simple” instances than “hard” ones. Those results are
+quite consistent with the distillation performances (student model size vs.
+accuracy): the Emotion dataset was successfully (almost without loss) distilled
+to a tiny MLP model, SST-2 to Bi-LSTM model and CoLA to DistillBERT model.  </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><b><span lang=EN>IMDB’s example </span></b></p>
+
+<p class=MsoNormal><span lang=EN>Lets apply our new metric to the popular IMDB
+dataset and try to predict the distillation results. </span></p>
+
+<p class=MsoNormal><span lang=EN>IMDB The Internet Movie Database (<a
+href="https://huggingface.co/datasets/imdb"><span style='color:#1155CC'>IMDB</span></a>)
+comprises single sentences extracted from informal movie reviews for binary
+(positive/negative) sentiment classification.</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>The training data
+consists, for this example, a subset of 1K randomly sampled samples from the
+25K training samples and 25K test samples.</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>We have calculated the WOS score of IMDB to be
+0.28. Since WOS is relatively low (&lt;0.3) we anticipate that an MLP or
+Bi-LSTM models should be suitable for absorbing the capacity of its teacher
+model (Roberta in this case).</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Here are the results of the distillation of
+the IMDB dataset/task :</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=a8 border=1 cellspacing=0 cellpadding=0 width=624
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>#Model
+  Parameters</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>BERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>88.6</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>DistilBERT</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>87.7</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>RoBERTa (teacher)</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91.6</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>110M</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>MLP </span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>MLP+D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>90</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>80K</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Bi-LSTM+D</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>0.7M</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Indeed, as we predicted, a small MLP/Bi-LSTM
+model is capable of absorbing RoBERTa’s knowledge for the IMDB dataset/task and
+even outperforms BERT performance. </span></p>
+
+<p class=MsoNormal><b><span lang=EN>&nbsp;</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN>&nbsp;</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN>The Switch Architecture</span></b></p>
+
+<p class=MsoNormal><span lang=EN><a href="https://arxiv.org/pdf/2004.07453.pdf"><span
+style='color:#1155CC'>Scwartz et al., 2020</span></a> proposed a transformer
+early exit based on the confidence of the prediction in each layer, or in other
+words the transformer dynamically expands/shrinks its size during  inference
+based on the complexity of each inference sample. As we showed so far, a
+dataset with the majority of simple instances can be  distilled by a very
+efficient model. So, continuing along this line we suggest to apply a
+“simple\hard” predictor of each input instance during inference time, and
+decide which student model to use based on this prediction. We refer to it as
+“the switch architecture”: for the “simple” instances use the student model and
+for the “hard” ones use a teacher model (no distillation). Since the student’s
+model architecture is considerably more efficient in relation to the teacher
+model (e.g. MLP/Bi-LSTM vs. BERT) for a dataset that consists of <b><u>a
+majority of simple instances </u></b>the average speed-up boost will be high
+with the switch architecture</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>Below a diagram that presents an abstract view
+of the switch architecture and followed by simple/hard instance examples from
+SST-2 dataset:</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN><img border=0 width=253 height=226
+id=image5.png src="2020-04-20-Distill-Blog_v1.fld/image006.jpg"></span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<table class=a9 border=1 cellspacing=0 cellpadding=0 width=652
+ style='border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Dataset</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Simple
+  Instance examples</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Hard Instance
+  examples</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>SST-2</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>extremely
+  confusing</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>the issue of
+  faith is not explored very deeply</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>the rock is aptly
+  named</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>works because ,
+  for the most part , it avoids the stupid cliches and formulaic potholes that
+  befall its brethren</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>sturdy
+  entertaining period drama both caine and fraser have their moments</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>what it lacks in
+  originality it makes up for in intelligence and b grade stylishness</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>moving and
+  invigorating film</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>succeeds in
+  providing a disquiet world the long dreaded completion of the police academy
+  series</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border-top:none;border-left:solid black 1.0pt;
+  border-bottom:none;border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>an intelligent</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>but the
+  characters tend to be cliches whose lives are never fully explored</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>&nbsp;</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>good movie</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>the story and
+  characters are nowhere near gripping enough</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='border:none'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='border:none'><span lang=EN>Following are some
+examples of the potential speed-up gains that can be achieved for the SST-2
+dataset/task with different student models:</span></p>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<table class=aa border=1 cellspacing=0 cellpadding=0 width=422
+ style='margin-left:-3.25pt;border-collapse:collapse;border:none'>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Model</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>*Speed-Up vs.
+  BERT-base</span></b></p>
+  </td>
+  <td valign=top style='border:solid black 1.0pt;border-left:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Accuracy</span></b></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>RoBERTa
+  (teacher)</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x1</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>93.54</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>BERT-base</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x1</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91.4</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>DistillBERT</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x2</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>90.4</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Bi-LSTM</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>**x40</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>81</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><b><span lang=EN>Bi-LSTM-D</span></b></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x40</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>90</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Switch
+  Bi-LSTM-D+BERT</span></p>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>5% hard samples</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x20</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>91.4</span></p>
+  </td>
+ </tr>
+ <tr>
+  <td valign=top style='border:solid black 1.0pt;border-top:none;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>Switch
+  Bi-LSTM-D+BERT</span></p>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>20% hard samples</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>x5</span></p>
+  </td>
+  <td valign=top style='border-top:none;border-left:none;border-bottom:solid black 1.0pt;
+  border-right:solid black 1.0pt;padding:5.0pt 5.0pt 5.0pt 5.0pt'>
+  <p class=MsoNormal style='line-height:normal'><span lang=EN>92.5</span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal style='text-align:justify'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal style='border:none'><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>*In our code example the instance classifier
+(hard/simple) implementation is far from being efficient, we need to run BERT
+twice on each test data instance. I’ll leave it for future research and be
+happy to get ideas to improve it.  In the table, the computing overhead for the
+classification has been neglected.</span></p>
+
+<p class=MsoNormal><span lang=EN>** Bi-LSTM relative speed-up as measured <a
+href="https://www.aclweb.org/anthology/2020.sustainlp-1.5.pdf"><span
+style='color:#1155CC'>here</span></a>. </span></p>
+
+<p class=MsoNormal><b><span lang=EN>&nbsp;</span></b></p>
+
+<p class=MsoNormal><b><span lang=EN>Data aware transformer and future research</span></b></p>
+
+<p class=MsoNormal><span lang=EN>BERT holds extensive knowledge on language
+structure including semantic/syntactic cues. It well known that after
+fine-tuning BERT utilizes partial and sufficient knowledge to solve a given
+task on a specific domain.  What maybe innovative contribution to BERTology,
+based on the switch arch results above, it seems that during inference BERT
+“retrive” sufficient knowledge to decode a specific instance, for simple
+examples shallow information (aka semantic) for hard examples higher level
+information (aka sysntactic or even world knolwedge). As a result data aware
+training allows to distill this knowledge into simpler architecture with
+limited capacity. </span></p>
+
+<p class=MsoNormal><span lang=EN>We encourage to continue and explore data
+aware optimization techniques in order to </span></p>
+
+<p class=MsoNormal><span lang=EN>dynamically adapt transformer size and speed
+in production. In addition, it would be important to understand when a data
+instance is “simple” or “hard” for a given task and exploit this prediction for
+an early exit or efficient switch arch. For challenging tasks (majority of the
+data are “hard” instances) like CoLA, SQuAD, OpenQA would be interesting to
+explore how external knowledge retrieval could transform “hard” instances to
+“simple” ones to gain maximum efficiency.   </span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+<p class=MsoNormal><span lang=EN>&nbsp;</span></p>
+
+</div>
+
+</body>
+
+</html>
