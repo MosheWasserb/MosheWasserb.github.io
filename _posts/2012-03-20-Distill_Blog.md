@@ -1,3 +1,9 @@
+---
+layout: post
+title: "The unreasonable effectiveness of distillation"
+date: 2012-03-20
+---
+
 **The unreasonable effectiveness of distillation - Text Classification
 Part 1/3**
 
